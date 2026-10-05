@@ -1,0 +1,16 @@
+{
+  "name": "@payloadshield/crypto",
+  "version": "0.1.0",
+  "description": "PayloadShield wire-compatible encryption using the Web Crypto API",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0"
+}

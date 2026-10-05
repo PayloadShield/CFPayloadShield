@@ -1,0 +1,7 @@
+name = "cfpayloadshield"
+main = "cloudflare/src/index.js"
+compatibility_date = "2025-06-01"
+
+[vars]
+PAYLOADSHIELD_ALGORITHM = "aes-gcm-256"
+PAYLOADSHIELD_MAX_BODY_SIZE = "10485760"
