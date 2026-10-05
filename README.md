@@ -49,19 +49,41 @@ secret prompt:
 [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
 ```
 
-For a local round-trip smoke test, put the values in `.dev.vars` (ignored by
-git), start a local plaintext echo origin on port 8091, run `npm run dev`, then
-run this from another terminal:
+To run the real local round-trip smoke test in VS Code's integrated terminal,
+open three terminal tabs in the project folder. First create `.dev.vars` with a
+temporary AES key; this file is ignored by git:
 
-```sh
-$env:PAYLOADSHIELD_KEY_B64 = "the-same-base64-key-from-dev.vars"
+```powershell
+$rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+$bytes = New-Object byte[] 32
+$rng.GetBytes($bytes)
+$rng.Dispose()
+$key = [Convert]::ToBase64String($bytes)
+@("ORIGIN_URL=http://127.0.0.1:8091", "PAYLOADSHIELD_KEY_B64=$key") |
+  Set-Content .dev.vars -Encoding ascii
+```
+
+Then run each command in its own terminal tab, leaving the first two running:
+
+```powershell
+npm run test:origin
+```
+
+```powershell
+npm run dev
+```
+
+```powershell
 npm run test:local
 ```
 
-The local smoke test posts an encrypted sample payload to Wrangler's local
-Worker and checks that the origin receives plaintext and that the client can
-decrypt the encrypted response. Set `PAYLOADSHIELD_LOCAL_URL` to target a
-different local Worker URL.
+The local smoke test posts an encrypted sample payload to Wrangler, checks that
+the mock origin received plaintext, and decrypts the encrypted response. It
+reads the test key from `.dev.vars` automatically. Stop the origin and Wrangler
+with Ctrl+C when finished, then remove the local key file with
+`Remove-Item .dev.vars`. Wrangler v4 requires Node.js 22+; check with `node -v`
+if `npm run dev` reports a runtime-version error. Set
+`PAYLOADSHIELD_LOCAL_URL` if Wrangler is listening on a different address.
 
 `wrangler.toml` selects the Worker entry point, AES-GCM algorithm, and default
 10 MiB plaintext limit. The Worker appends the incoming path and query string

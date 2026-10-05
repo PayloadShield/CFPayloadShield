@@ -1,13 +1,25 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import {
   decryptPayload,
   encryptPayload,
 } from "../../packages/payloadshield-crypto/src/index.js";
 
-const keyBase64 = process.env.PAYLOADSHIELD_KEY_B64;
+let keyBase64 = process.env.PAYLOADSHIELD_KEY_B64;
 if (!keyBase64) {
-  throw new Error("Set PAYLOADSHIELD_KEY_B64 to run the local Worker smoke test");
+  const devVarsPath = new URL("../../.dev.vars", import.meta.url);
+  try {
+    const devVars = await readFile(devVarsPath, "utf8");
+    keyBase64 = devVars.match(/^PAYLOADSHIELD_KEY_B64=(.+)$/m)?.[1];
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+}
+if (!keyBase64) {
+  throw new Error(
+    "Set PAYLOADSHIELD_KEY_B64 or add it to the project .dev.vars file",
+  );
 }
 
 const key = Uint8Array.from(atob(keyBase64), (character) => character.charCodeAt(0));

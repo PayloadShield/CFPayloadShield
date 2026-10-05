@@ -62,7 +62,9 @@ decisions can be reviewed alongside the code.
   response is encrypted, plus malformed-request and unsupported-algorithm
   cases.
 - Added `npm run test:local` for a real Wrangler-to-origin-to-client local
-  encrypted smoke test.
+  encrypted smoke test, and `npm run test:origin` to launch its local mock
+  plaintext origin.
+- Let the smoke test read the ignored `.dev.vars` key file automatically.
 - Reason: checking both the crypto API and adapter tests the end-to-end contract
   rather than only syntax or file presence.
 
